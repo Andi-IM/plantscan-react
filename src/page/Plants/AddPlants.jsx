@@ -1,21 +1,27 @@
+import { CloseCircleFilled } from "@ant-design/icons";
+import { CloseCircleOutlined } from "@ant-design/icons/lib/icons";
 import {
+  Badge,
   Button,
   Col,
   Form,
   Image,
   Input,
-  message,
   Modal,
   Row,
   Space,
   Tooltip,
   Typography,
-  Upload,
 } from "antd";
-import { Fragment, useState } from "react";
-import getBase64 from "../../helpers/getBase64";
+import { useState } from "react";
+import ModalEditPhoto from "../../components/Plants/ModalEditPhoto";
+import PlantsLeftForm from "../../components/Plants/PlantsLeftForm";
+import PlantsRightForm from "../../components/Plants/PlantsRightForm";
+import PlantsFormContext from "../../context/PlantsFormContext";
 
 const AddPlants = () => {
+  const [FormInstance] = Form.useForm();
+
   const [imageData, setImageData] = useState([]);
   const [openModalImg, setOpenModalImg] = useState(false);
 
@@ -25,159 +31,106 @@ const AddPlants = () => {
     attribusi: "",
   });
 
-  const [FormInstance] = Form.useForm();
+  const deleteImgHandler = (id) => {
+    Modal.confirm({
+      content: "Apakah yakin untuk hapus ?",
+      onOk: () => {
+        setImageData(imageData?.filter((data) => data?.id !== id));
+      },
+      okText: "Hapus",
+      okButtonProps: {
+        danger: true,
+      },
+    });
+  };
 
   return (
-    <Fragment>
-      <Row>
-        <Col span={24}>
-          <Typography.Title>Tambah Plant</Typography.Title>
-        </Col>
-      </Row>
-
-      <Form
-        initialValues={{
-          otherName: [""],
+    <div style={{ background: "white", padding: 20, borderRadius: 10 }}>
+      <PlantsFormContext.Provider
+        value={{
+          imageData,
+          setImageData,
+          openModalImg,
+          setOpenModalImg,
+          objDetailImg,
+          setObjDetailImg,
         }}
-        form={FormInstance}
       >
         <Row>
-          <Col span={12}>
-            <Typography.Text strong>Plant Details</Typography.Text>
-            <Form.Item
-              name="plantName"
-              label="Plant Name"
-              labelCol={{ span: 24 }}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item name="spesies" label="Spesies" labelCol={{ span: 24 }}>
-              <Input />
-            </Form.Item>
-
-            <Row gutter={[16, 16]}>
-              <Col span={24}>
-                <Typography.Text>Other Name</Typography.Text>
-              </Col>
-              <Col>
-                <Form.List name="otherName">
-                  {(fields, { add, remove }) => {
-                    return (
-                      <Fragment>
-                        {fields?.map((field) => {
-                          return (
-                            <Row key={field?.name} gutter={[16, 16]}>
-                              <Col>
-                                <Form.Item>
-                                  <Input name={[field?.name, "name"]} />
-                                </Form.Item>
-                              </Col>
-                              <Col>
-                                <Button onClick={add}>Tambah</Button>
-                              </Col>
-                              {fields?.length > 1 ? (
-                                <Col>
-                                  <Button onClick={() => remove(field?.name)}>
-                                    Remove
-                                  </Button>
-                                </Col>
-                              ) : (
-                                <Fragment />
-                              )}
-                            </Row>
-                          );
-                        })}
-                      </Fragment>
-                    );
-                  }}
-                </Form.List>
-              </Col>
-            </Row>
-
-            <Form.Item name="desc" label="Description" labelCol={{ span: 24 }}>
-              <Input.TextArea />
-            </Form.Item>
-
-            <Form.Item>
-              <Upload
-                beforeUpload={async (file) => {
-                  if (imageData?.length >= 5) {
-                    message.error("Sudah ada batas");
-                  } else {
-                    const previewTemp = await getBase64(file);
-
-                    setImageData([
-                      ...imageData,
-                      {
-                        url: previewTemp,
-                        desc: "",
-                        attribusi: "",
-                      },
-                    ]);
-                  }
-                  return false;
-                }}
-                accept="image/*"
-              >
-                <Button block>Upload Image</Button>
-              </Upload>
-            </Form.Item>
-            <Space size="large">
-              {imageData?.map((dataPreview, idx) => (
-                <Tooltip title="Tes" key={idx}>
-                  <Image
-                    style={{ cursor: "pointer" }}
-                    src={dataPreview?.url}
-                    width={300}
-                    height={300}
-                    preview={false}
-                    onClick={() => {
-                      setObjDetailImg({
-                        url: dataPreview?.url,
-                        desc: dataPreview?.desc,
-                        attribusi: dataPreview?.attribusi,
-                      });
-                      setOpenModalImg(true);
-                    }}
-                  />
-                </Tooltip>
-              ))}
-            </Space>
+          <Col span={24}>
+            <Typography.Title>Tambah Plant</Typography.Title>
           </Col>
-          <Col span={12}></Col>
         </Row>
-      </Form>
 
-      <Modal
-        open={openModalImg}
-        title="Deskripsi Foto"
-        onCancel={() => setOpenModalImg(false)}
-      >
-        <Form>
+        <Form
+          initialValues={{
+            otherName: [""],
+          }}
+          form={FormInstance}
+        >
           <Row gutter={[16, 16]}>
             <Col span={12}>
-              <Image src={objDetailImg?.url} />
+              <PlantsLeftForm />
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="desc"
-                labelCol={{ span: 24 }}
-                label="Description"
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="attribusi"
-                labelCol={{ span: 24 }}
-                label="Attribusi"
-              >
-                <Input />
-              </Form.Item>
+              <PlantsRightForm />
+              <Row>
+                <Col span={24} style={{ textAlign: "right" }}>
+                  <Button type="primary">Update</Button>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={24}>
+              <Space size="large" wrap>
+                {imageData?.map((dataPreview, idx) => (
+                  <Tooltip
+                    title={
+                      dataPreview?.desc || "Klik untuk menambahkan informasi"
+                    }
+                    key={idx}
+                  >
+                    <Badge
+                      count={
+                        <Button
+                          icon={
+                            <CloseCircleOutlined
+                              style={{ cursor: "pointer", fontSize: 28 }}
+                            />
+                          }
+                          shape="circle"
+                          danger
+                          onClick={() => deleteImgHandler(dataPreview?.id)}
+                          style={{ background: "transparent", border: 0 }}
+                        />
+                      }
+                    >
+                      <Image
+                        style={{ cursor: "pointer" }}
+                        src={dataPreview?.url}
+                        width={100}
+                        height={100}
+                        preview={false}
+                        onClick={() => {
+                          setObjDetailImg({
+                            ...dataPreview,
+                          });
+                          setOpenModalImg(true);
+                        }}
+                      />
+                    </Badge>
+                  </Tooltip>
+                ))}
+              </Space>
             </Col>
           </Row>
         </Form>
-      </Modal>
-    </Fragment>
+
+        <ModalEditPhoto />
+      </PlantsFormContext.Provider>
+    </div>
   );
 };
 export default AddPlants;
