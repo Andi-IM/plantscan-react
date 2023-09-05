@@ -1,4 +1,4 @@
-import { Button, Col, Row, Typography, Table, Spin } from "antd";
+import { Button, Col, Row, Typography, Table, Spin, Image } from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import formatSecondsToDate from "../../helpers/formatSecondsToDate";
@@ -23,9 +23,14 @@ const PlantLists = () => {
       });
   };
 
+  const goToDetail = (id) => {
+    navigate(`detail_plant/${id}`);
+  };
+
   useEffect(() => {
     getDataPlant();
   }, []);
+
   return (
     <Fragment>
       <Row justify="space-between">
@@ -48,7 +53,15 @@ const PlantLists = () => {
         <Col span={24}>
           <Spin spinning={loading}>
             <Table dataSource={arrDatas} tableLayout="fixed">
-              <Column dataIndex="PlantName" title="Name" />
+              <Column
+                title="Thumbnail"
+                render={(record) => {
+                  return (
+                    <Image src={record?.photoPlants?.[0]?.url} width={150} />
+                  );
+                }}
+              />
+              <Column dataIndex="plantName" title="Name" />
               <Column dataIndex="ID" title="ID" />
               <Column
                 dataIndex="Updated"
@@ -57,8 +70,15 @@ const PlantLists = () => {
               />
               <Column
                 title="Action"
-                render={() => {
-                  return <Button type="primary">Detail</Button>;
+                render={(render) => {
+                  return (
+                    <Button
+                      type="primary"
+                      onClick={() => goToDetail(render?.id)}
+                    >
+                      Detail
+                    </Button>
+                  );
                 }}
               />
             </Table>

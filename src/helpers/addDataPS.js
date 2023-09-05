@@ -1,3 +1,4 @@
+import { message } from "antd";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebase";
 import refetchHandler from "./refetchHandler";
@@ -13,7 +14,9 @@ const addDataPS = async ({ collectionName, formData, successCb }) => {
       if (successCb) {
         successCb();
       } else {
-        alert("success");
+        message.success({
+          content: "Sukses",
+        });
       }
 
       const newArrDatas = await refetchHandler({

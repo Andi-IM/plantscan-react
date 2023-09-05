@@ -76,8 +76,7 @@ function Dashboard() {
               <Column
                 title="Date"
                 dataIndex="Date"
-                // render={(date) => formatSecondsToDate(date?.seconds)}
-                render={(date) => JSON.stringify(date)}
+                render={(date) => formatSecondsToDate(date?.seconds)}
               />
               <Column title="Instance" dataIndex="Instance" />
             </Table>
