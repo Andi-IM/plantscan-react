@@ -35,12 +35,9 @@ const PlantsForm = ({ type }) => {
   const [objDetailImg, setObjDetailImg] = useState({
     url: "",
     desc: "",
-    attribusi: "",
+    attribution: "",
   });
   const [loading, setLoading] = useState(false);
-
-  // edit
-  const [objDetailPlants, setObjDetailPlants] = useState({});
 
   const deleteImgHandler = (id) => {
     Modal.confirm({
@@ -60,8 +57,8 @@ const PlantsForm = ({ type }) => {
       collectionName: "plants",
       id,
     })?.then((objData) => {
-      setImageData(objData?.photoPlants);
-      delete objData["photoPlants"];
+      setImageData(objData?.images);
+      delete objData["images"];
       FormInstance?.setFieldsValue(objData);
     });
   };
@@ -111,11 +108,19 @@ const PlantsForm = ({ type }) => {
     setLoading(true);
     const formData = {
       ...FormInstance?.getFieldsValue(),
-      otherName: FormInstance?.getFieldValue("otherName")?.map((data) => ({
+      common_name: FormInstance?.getFieldValue("common_name")?.map((data) => ({
         name: data?.name,
       })),
-      photoPlants: imageData,
+      images: imageData,
       Updated: serverTimestamp(),
+      taxonomy: {
+        class: FormInstance?.getFieldValue("class"),
+        family: FormInstance?.getFieldValue("family"),
+        genus: FormInstance?.getFieldValue("genus"),
+        order: FormInstance?.getFieldValue("order"),
+        phylum: FormInstance?.getFieldValue("phylum"),
+      },
+      thumbnail: imageData?.[0]?.url,
     };
 
     if (type === "add") {
@@ -173,6 +178,7 @@ const PlantsForm = ({ type }) => {
           setOpenModalImg,
           objDetailImg,
           setObjDetailImg,
+          FormInstance,
         }}
       >
         <Row>
@@ -186,7 +192,7 @@ const PlantsForm = ({ type }) => {
         <Form
           initialValues={{
             ...(type === "add" && {
-              otherName: [""],
+              common_name: [""],
             }),
           }}
           form={FormInstance}

@@ -15,15 +15,60 @@ import {
 import { Fragment } from "react";
 import { usePlantsFormContext } from "../../context/PlantsFormContext";
 import getBase64 from "../../helpers/getBase64";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadString,
+} from "firebase/storage";
 
 const PlantsLeftForm = () => {
-  const { imageData, setImageData } = usePlantsFormContext();
+  const { imageData, setImageData, FormInstance } = usePlantsFormContext();
 
+  const beforeUploadHandler = async (file) => {
+    if (file?.type?.includes("image")) {
+      const storage = getStorage();
+      const storageRef = ref(
+        storage,
+        `/orchids/${FormInstance?.getFieldValue("name")}/${file?.name}`
+      );
+
+      if (imageData?.length >= 5) {
+        message.error("Sudah ada batas");
+      } else {
+        const previewTemp = await getBase64(file);
+        uploadString(storageRef, previewTemp, "data_url")
+          .then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              setImageData([
+                ...imageData,
+                {
+                  id: Date.now(),
+                  url: downloadURL,
+                  desc: "",
+                  attribution: "",
+                },
+              ]);
+            });
+          })
+          ?.catch((e) =>
+            message.error({
+              content: JSON.stringify(e),
+            })
+          );
+      }
+    } else {
+      message.error({
+        content: "Please upload image file",
+      });
+    }
+    return false;
+  };
   return (
     <>
       <Form.Item
         rules={[{ required: true }]}
-        name="plantName"
+        name="name"
         label="Plant Name"
         labelCol={{ span: 24 }}
       >
@@ -43,7 +88,7 @@ const PlantsLeftForm = () => {
           <Typography.Text>Other Name</Typography.Text>
         </Col>
         <Col span={24}>
-          <Form.List name="otherName">
+          <Form.List name="common_name">
             {(fields, { add, remove }) => {
               return (
                 <Fragment>
@@ -84,32 +129,15 @@ const PlantsLeftForm = () => {
         </Col>
       </Row>
 
-      <Form.Item name="desc" label="Description" labelCol={{ span: 24 }}>
+      <Form.Item name="description" label="Description" labelCol={{ span: 24 }}>
         <Input.TextArea rows={10} />
       </Form.Item>
 
-      <Form.Item name="photoPlants">
+      <Form.Item name="images">
         <Upload
           rules={[{ required: true }]}
           showUploadList={false}
-          beforeUpload={async (file) => {
-            if (imageData?.length >= 5) {
-              message.error("Sudah ada batas");
-            } else {
-              const previewTemp = await getBase64(file);
-
-              setImageData([
-                ...imageData,
-                {
-                  id: Date.now(),
-                  url: previewTemp,
-                  desc: "",
-                  attribusi: "",
-                },
-              ]);
-            }
-            return false;
-          }}
+          beforeUpload={beforeUploadHandler}
           accept="image/*"
         >
           <Button block>Upload Image</Button>

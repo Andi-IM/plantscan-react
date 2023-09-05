@@ -40,13 +40,17 @@ const ModalEditPhoto = () => {
             <Image src={objDetailImg?.url} />
           </Col>
           <Col span={12}>
-            <Form.Item name="desc" labelCol={{ span: 24 }} label="Description">
+            <Form.Item
+              name="description"
+              labelCol={{ span: 24 }}
+              label="Description"
+            >
               <Input />
             </Form.Item>
             <Form.Item
-              name="attribusi"
+              name="attribution"
               labelCol={{ span: 24 }}
-              label="Attribusi"
+              label="Attribution"
             >
               <Input />
             </Form.Item>
