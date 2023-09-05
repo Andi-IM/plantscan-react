@@ -123,6 +123,11 @@ const PlantsForm = ({ type }) => {
       thumbnail: imageData?.[0]?.url,
     };
 
+    const arrExcludeKey = ["class", "family", "genus", "order", "phylum"];
+    arrExcludeKey?.forEach((key) => {
+      delete formData[key];
+    });
+
     if (type === "add") {
       addDataHandler(formData);
     } else {

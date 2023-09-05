@@ -78,8 +78,8 @@ const PlantsLeftForm = () => {
       </Form.Item>
       <Form.Item
         rules={[{ required: true }]}
-        name="spesies"
-        label="Spesies"
+        name="species"
+        label="species"
         labelCol={{ span: 24 }}
       >
         <Input />
