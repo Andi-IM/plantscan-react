@@ -51,8 +51,8 @@ const PlantsLeftForm = () => {
                     return (
                       <Row key={field?.name} gutter={[16, 16]}>
                         <Col>
-                          <Form.Item>
-                            <Input name={[field?.name, "name"]} />
+                          <Form.Item name={[field?.name, "name"]}>
+                            <Input />
                           </Form.Item>
                         </Col>
                         {field?.name !== 1 && (
@@ -88,7 +88,7 @@ const PlantsLeftForm = () => {
         <Input.TextArea rows={10} />
       </Form.Item>
 
-      <Form.Item>
+      <Form.Item name="photoPlants">
         <Upload
           rules={[{ required: true }]}
           showUploadList={false}
