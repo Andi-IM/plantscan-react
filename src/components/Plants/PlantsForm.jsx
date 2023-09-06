@@ -9,10 +9,11 @@ import {
   Modal,
   Row,
   Space,
+  Spin,
   Tooltip,
   Typography,
 } from "antd";
-import { serverTimestamp } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PlantsFormContext from "../../context/PlantsFormContext";
@@ -35,12 +36,9 @@ const PlantsForm = ({ type }) => {
   const [objDetailImg, setObjDetailImg] = useState({
     url: "",
     desc: "",
-    attribusi: "",
+    attribution: "",
   });
   const [loading, setLoading] = useState(false);
-
-  // edit
-  const [objDetailPlants, setObjDetailPlants] = useState({});
 
   const deleteImgHandler = (id) => {
     Modal.confirm({
@@ -56,14 +54,26 @@ const PlantsForm = ({ type }) => {
   };
 
   const getDetailPlants = () => {
+    setLoading(true);
     getDocPS({
       collectionName: "plants",
       id,
-    })?.then((objData) => {
-      setImageData(objData?.photoPlants);
-      delete objData["photoPlants"];
-      FormInstance?.setFieldsValue(objData);
-    });
+    })
+      ?.then((objData) => {
+        setImageData(objData?.images);
+        delete objData["images"];
+        FormInstance?.setFieldsValue(objData);
+        FormInstance.setFieldsValue({
+          genus: objData?.taxonomy?.genus,
+          class: objData?.taxonomy?.class,
+          family: objData?.taxonomy?.family,
+          order: objData?.taxonomy?.order,
+          phylum: objData?.taxonomy?.phylum,
+        });
+      })
+      ?.finally(() => {
+        setLoading(false);
+      });
   };
   const addDataHandler = (formData) => {
     addDataPS({
@@ -111,12 +121,25 @@ const PlantsForm = ({ type }) => {
     setLoading(true);
     const formData = {
       ...FormInstance?.getFieldsValue(),
-      otherName: FormInstance?.getFieldValue("otherName")?.map((data) => ({
+      common_name: FormInstance?.getFieldValue("common_name")?.map((data) => ({
         name: data?.name,
       })),
-      photoPlants: imageData,
-      Updated: serverTimestamp(),
+      images: imageData,
+      Updated: Timestamp.now(),
+      taxonomy: {
+        class: FormInstance?.getFieldValue("class"),
+        family: FormInstance?.getFieldValue("family"),
+        genus: FormInstance?.getFieldValue("genus"),
+        order: FormInstance?.getFieldValue("order"),
+        phylum: FormInstance?.getFieldValue("phylum"),
+      },
+      thumbnail: imageData?.[0]?.url,
     };
+
+    const arrExcludeKey = ["class", "family", "genus", "order", "phylum"];
+    arrExcludeKey?.forEach((key) => {
+      delete formData[key];
+    });
 
     if (type === "add") {
       addDataHandler(formData);
@@ -164,120 +187,125 @@ const PlantsForm = ({ type }) => {
   }, []);
 
   return (
-    <div style={{ background: "white", padding: 20, borderRadius: 10 }}>
-      <PlantsFormContext.Provider
-        value={{
-          imageData,
-          setImageData,
-          openModalImg,
-          setOpenModalImg,
-          objDetailImg,
-          setObjDetailImg,
-        }}
-      >
-        <Row>
-          <Col span={24}>
-            <Typography.Title>
-              {type === "add" ? "Tambah Plant" : "Edit Plant"}
-            </Typography.Title>
-          </Col>
-        </Row>
-
-        <Form
-          initialValues={{
-            ...(type === "add" && {
-              otherName: [""],
-            }),
+    <Spin spinning={loading}>
+      <div style={{ background: "white", padding: 20, borderRadius: 10 }}>
+        <PlantsFormContext.Provider
+          value={{
+            imageData,
+            setImageData,
+            openModalImg,
+            setOpenModalImg,
+            objDetailImg,
+            setObjDetailImg,
+            FormInstance,
+            loading,
+            setLoading,
           }}
-          form={FormInstance}
         >
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <PlantsLeftForm />
+          <Row>
+            <Col span={24}>
+              <Typography.Title>
+                {type === "add" ? "Tambah Plant" : "Edit Plant"}
+              </Typography.Title>
             </Col>
-            <Col span={12}>
-              <PlantsRightForm />
-              <Row gutter={[16, 16]}>
-                <Col span={24} style={{ textAlign: "right" }}>
-                  <Button
-                    loading={loading}
-                    type="primary"
-                    onClick={() => {
-                      FormInstance?.validateFields()?.then(() => {
-                        submitHandler();
-                      });
-                    }}
-                  >
-                    {type === "add" ? "Add" : "Update"}
-                  </Button>
-                </Col>
-                {type === "edit" && (
+          </Row>
+
+          <Form
+            initialValues={{
+              ...(type === "add" && {
+                common_name: [""],
+              }),
+            }}
+            form={FormInstance}
+          >
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <PlantsLeftForm />
+              </Col>
+              <Col span={12}>
+                <PlantsRightForm />
+                <Row gutter={[16, 16]}>
                   <Col span={24} style={{ textAlign: "right" }}>
                     <Button
                       loading={loading}
                       type="primary"
-                      danger
                       onClick={() => {
-                        deleteHandler();
+                        FormInstance?.validateFields()?.then(() => {
+                          submitHandler();
+                        });
                       }}
                     >
-                      Delete
+                      {type === "add" ? "Add" : "Update"}
                     </Button>
                   </Col>
-                )}
-              </Row>
-            </Col>
-          </Row>
-
-          <Row>
-            <Col span={24}>
-              <Space size="large" wrap>
-                {imageData?.map((dataPreview, idx) => (
-                  <Tooltip
-                    title={
-                      dataPreview?.desc || "Klik untuk menambahkan informasi"
-                    }
-                    key={idx}
-                  >
-                    <Badge
-                      count={
-                        <Button
-                          icon={
-                            <CloseCircleOutlined
-                              style={{ cursor: "pointer", fontSize: 28 }}
-                            />
-                          }
-                          shape="circle"
-                          danger
-                          onClick={() => deleteImgHandler(dataPreview?.id)}
-                          style={{ background: "transparent", border: 0 }}
-                        />
-                      }
-                    >
-                      <Image
-                        style={{ cursor: "pointer" }}
-                        src={dataPreview?.url}
-                        width={100}
-                        height={100}
-                        preview={false}
+                  {type === "edit" && (
+                    <Col span={24} style={{ textAlign: "right" }}>
+                      <Button
+                        loading={loading}
+                        type="primary"
+                        danger
                         onClick={() => {
-                          setObjDetailImg({
-                            ...dataPreview,
-                          });
-                          setOpenModalImg(true);
+                          deleteHandler();
                         }}
-                      />
-                    </Badge>
-                  </Tooltip>
-                ))}
-              </Space>
-            </Col>
-          </Row>
-        </Form>
+                      >
+                        Delete
+                      </Button>
+                    </Col>
+                  )}
+                </Row>
+              </Col>
+            </Row>
 
-        <ModalEditPhoto />
-      </PlantsFormContext.Provider>
-    </div>
+            <Row>
+              <Col span={24}>
+                <Space size="large" wrap>
+                  {imageData?.map((dataPreview, idx) => (
+                    <Tooltip
+                      title={
+                        dataPreview?.desc || "Klik untuk menambahkan informasi"
+                      }
+                      key={idx}
+                    >
+                      <Badge
+                        count={
+                          <Button
+                            icon={
+                              <CloseCircleOutlined
+                                style={{ cursor: "pointer", fontSize: 28 }}
+                              />
+                            }
+                            shape="circle"
+                            danger
+                            onClick={() => deleteImgHandler(dataPreview?.id)}
+                            style={{ background: "transparent", border: 0 }}
+                          />
+                        }
+                      >
+                        <Image
+                          style={{ cursor: "pointer" }}
+                          src={dataPreview?.url}
+                          width={100}
+                          height={100}
+                          preview={false}
+                          onClick={() => {
+                            setObjDetailImg({
+                              ...dataPreview,
+                            });
+                            setOpenModalImg(true);
+                          }}
+                        />
+                      </Badge>
+                    </Tooltip>
+                  ))}
+                </Space>
+              </Col>
+            </Row>
+          </Form>
+
+          <ModalEditPhoto />
+        </PlantsFormContext.Provider>
+      </div>
+    </Spin>
   );
 };
 export default PlantsForm;

@@ -56,12 +56,10 @@ const PlantLists = () => {
               <Column
                 title="Thumbnail"
                 render={(record) => {
-                  return (
-                    <Image src={record?.photoPlants?.[0]?.url} width={150} />
-                  );
+                  return <Image src={record?.images?.[0]?.url} width={150} />;
                 }}
               />
-              <Column dataIndex="plantName" title="Name" />
+              <Column dataIndex="name" title="Name" />
               <Column dataIndex="ID" title="ID" />
               <Column
                 dataIndex="Updated"
