@@ -60,6 +60,13 @@ const PlantsForm = ({ type }) => {
       setImageData(objData?.images);
       delete objData["images"];
       FormInstance?.setFieldsValue(objData);
+      FormInstance.setFieldsValue({
+        genus: objData?.taxonomy?.genus,
+        class: objData?.taxonomy?.class,
+        family: objData?.taxonomy?.family,
+        order: objData?.taxonomy?.order,
+        phylum: objData?.taxonomy?.phylum,
+      });
     });
   };
   const addDataHandler = (formData) => {
@@ -121,6 +128,9 @@ const PlantsForm = ({ type }) => {
         phylum: FormInstance?.getFieldValue("phylum"),
       },
       thumbnail: imageData?.[0]?.url,
+      ...(type === "add" && {
+        date: serverTimestamp(),
+      }),
     };
 
     const arrExcludeKey = ["class", "family", "genus", "order", "phylum"];
