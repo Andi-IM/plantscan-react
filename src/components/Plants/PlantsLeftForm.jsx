@@ -21,10 +21,11 @@ import {
   ref,
   uploadString,
 } from "firebase/storage";
+import {  Timestamp } from "firebase/firestore";
 
 const PlantsLeftForm = () => {
-  const { imageData, setImageData, FormInstance } = usePlantsFormContext();
-
+  const { imageData, setImageData, FormInstance, loading, setLoading } =
+    usePlantsFormContext();
   const beforeUploadHandler = async (file) => {
     if (file?.type?.includes("image")) {
       FormInstance?.validateFields(["name"])?.then(async () => {
@@ -38,6 +39,7 @@ const PlantsLeftForm = () => {
           message.error("Sudah ada batas");
         } else {
           const previewTemp = await getBase64(file);
+          setLoading(true);
           uploadString(storageRef, previewTemp, "data_url")
             .then((snapshot) => {
               getDownloadURL(snapshot.ref).then((downloadURL) => {
@@ -48,15 +50,19 @@ const PlantsLeftForm = () => {
                     url: downloadURL,
                     desc: "",
                     attribution: "",
+                    date: Timestamp.now(),
                   },
                 ]);
               });
             })
-            ?.catch((e) =>
+            ?.catch((e) => {
               message.error({
                 content: JSON.stringify(e),
-              })
-            );
+              });
+            })
+            ?.finally(() => {
+              setLoading(false);
+            });
         }
       });
     } else {
@@ -142,7 +148,9 @@ const PlantsLeftForm = () => {
           beforeUpload={beforeUploadHandler}
           accept="image/*"
         >
-          <Button block>Upload Image</Button>
+          <Button block loading={loading}>
+            Upload Image
+          </Button>
         </Upload>
       </Form.Item>
     </>
