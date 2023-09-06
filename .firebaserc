@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "orchid-app-7fe3d"
+  },
+  "targets": {
+    "orchid-app-7fe3d": {
+      "hosting": {
+        "dist": [
+          "admin-orchid"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

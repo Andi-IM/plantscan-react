@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "admin-orchid",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
