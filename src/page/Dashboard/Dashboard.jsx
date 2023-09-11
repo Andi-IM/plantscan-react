@@ -4,6 +4,8 @@ import {useEffect, useState} from "react";
 import {Col, Row, Space, Spin, Table, Typography} from "antd";
 import formatSecondsToDate from "../../helpers/formatSecondsToDate";
 import CardData from "../../components/Dashboard/CardData";
+import getUsers from "../../helpers/getUsers.js";
+import formatFloatToPercent from "../../helpers/formatFloatToPercent.js";
 
 const {Column} = Table;
 
@@ -17,7 +19,7 @@ function Dashboard() {
 
     const getDataHandler = () => {
         getDocsPS({
-            collectionName: "history",
+            collectionName: "detections",
         })?.then((arrDatas) => {
             setState((prev) => ({
                 ...prev,
@@ -27,14 +29,9 @@ function Dashboard() {
     };
 
     const userCount = () => {
-        fetch("https://orchid-app-7fe3d.et.r.appspot.com/users")
-            .then(response => {
-                if (response.ok){
-                    response.json().then(data => {
-                        setUser(data.size)
-                    })
-                }
-            })
+        getUsers().then(result => {
+            setUser(result.data.size)
+        })
     }
 
     // const addDataHandler = () => {
@@ -83,14 +80,19 @@ function Dashboard() {
                 <Col span={24}>
                     <Spin spinning={state?.loading}>
                         <Table dataSource={state?.arrDatas} tableLayout="fixed">
-                            <Column title="UID" dataIndex="UID"/>
-                            <Column title="Acc" dataIndex="Acc"/>
+                            <Column title="UID" dataIndex="id"/>
+                            <Column title="UserID" dataIndex="userId"/>
+                            <Column
+                                title="Acc"
+                                dataIndex="accuracy"
+                                render={(acc) => formatFloatToPercent(acc)}
+                            />
                             <Column
                                 title="Date"
-                                dataIndex="Date"
+                                dataIndex="timestamp"
                                 render={(date) => formatSecondsToDate(date?.seconds)}
                             />
-                            <Column title="Instance" dataIndex="Instance"/>
+                            <Column title="result" dataIndex="plantRef"/>
                         </Table>
                     </Spin>
                 </Col>
