@@ -1,4 +1,7 @@
-import { CloseCircleOutlined } from "@ant-design/icons/lib/icons";
+import {
+  ArrowLeftOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons/lib/icons";
 import {
   Badge,
   Button,
@@ -202,8 +205,18 @@ const PlantsForm = ({ type }) => {
             setLoading,
           }}
         >
-          <Row>
-            <Col span={24}>
+          <Row align="middle">
+            <Col span={2}>
+              <Button
+                shape="circle"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => {
+                  navigate("/plant_lists");
+                }}
+              />
+            </Col>
+
+            <Col span={22}>
               <Typography.Title>
                 {type === "add" ? "Tambah Plant" : "Edit Plant"}
               </Typography.Title>
