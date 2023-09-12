@@ -5,7 +5,6 @@ import {
   Typography,
   Table,
   Spin,
-  Image,
   Modal,
   message,
 } from "antd";
@@ -72,12 +71,6 @@ const SuggestionLists = () => {
         <Col span={24}>
           <Spin spinning={loading}>
             <Table dataSource={arrDatas} tableLayout="fixed">
-              <Column
-                title="Thumbnail"
-                render={(record) => {
-                  return <Image src={record?.images?.[0]?.url} width={150} />;
-                }}
-              />
               <Column dataIndex="id" title="id" />
               <Column dataIndex="description" title="Description" />
               <Column
