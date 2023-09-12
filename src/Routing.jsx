@@ -8,6 +8,8 @@ import Login from "./page/Login";
 import NotFound from "./page/NotFound";
 import useCheckLogin from "./hooks/useCheckLogin";
 import { Spin } from "antd";
+import SuggestionLists from "./page/Suggestion/SuggestionLists";
+import SuggestionDetail from "./page/Suggestion/SuggestionDetail";
 
 const Routing = () => {
   const { isLogin, isLoadingLogin } = useCheckLogin();
@@ -28,6 +30,11 @@ const Routing = () => {
               <Route
                 path="/plant_lists/detail_plant/:id"
                 element={<EditPlants />}
+              />
+              <Route path="/suggestion_lists" element={<SuggestionLists />} />
+              <Route
+                path="/suggestion_lists/detail_suggestion/:id"
+                element={<SuggestionDetail />}
               />
             </>
           ) : (

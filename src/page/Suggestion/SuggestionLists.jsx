@@ -1,11 +1,22 @@
-import { Button, Col, Row, Typography, Table, Spin, Image } from "antd";
+import {
+  Button,
+  Col,
+  Row,
+  Typography,
+  Table,
+  Spin,
+  Image,
+  Modal,
+  message,
+} from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import deleteDataPS from "../../helpers/deleteDataPS";
 import formatSecondsToDate from "../../helpers/formatSecondsToDate";
 import getDocsPS from "../../helpers/getDocsPS";
 
 const { Column } = Table;
-const PlantLists = () => {
+const SuggestionLists = () => {
   const [arrDatas, setArrDatas] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -13,7 +24,7 @@ const PlantLists = () => {
   const getDataPlant = async () => {
     setLoading(true);
     getDocsPS({
-      collectionName: "plants",
+      collectionName: "suggestions",
     })
       ?.then((data) => {
         setArrDatas(data);
@@ -24,7 +35,25 @@ const PlantLists = () => {
   };
 
   const goToDetail = (id) => {
-    navigate(`detail_plant/${id}`);
+    navigate(`detail_suggestion/${id}`);
+  };
+
+  const solveHandler = (id) => {
+    Modal.confirm({
+      content: "Are you sure ?",
+      onOk: () => {
+        deleteDataPS({
+          collectionName: "suggestions",
+          docId: id,
+          succesCb: () => {
+            message.success({
+              content: "Success solve",
+            });
+            getDataPlant();
+          },
+        });
+      },
+    });
   };
 
   useEffect(() => {
@@ -35,17 +64,7 @@ const PlantLists = () => {
     <Fragment>
       <Row justify="space-between">
         <Col span={12}>
-          <Typography.Title>Data Bunga Didukung</Typography.Title>
-        </Col>
-        <Col>
-          <Button
-            type="primary"
-            onClick={() => {
-              navigate("add_plant");
-            }}
-          >
-            Tambah Bunga
-          </Button>
+          <Typography.Title>Suggestion</Typography.Title>
         </Col>
       </Row>
 
@@ -59,10 +78,10 @@ const PlantLists = () => {
                   return <Image src={record?.images?.[0]?.url} width={150} />;
                 }}
               />
-              <Column dataIndex="name" title="Name" />
-              <Column dataIndex="ID" title="ID" />
+              <Column dataIndex="id" title="id" />
+              <Column dataIndex="description" title="Description" />
               <Column
-                dataIndex="Updated"
+                dataIndex="date"
                 title="Updated"
                 render={(date) => formatSecondsToDate(date?.seconds)}
               />
@@ -70,12 +89,21 @@ const PlantLists = () => {
                 title="Action"
                 render={(render) => {
                   return (
-                    <Button
-                      type="primary"
-                      onClick={() => goToDetail(render?.id)}
-                    >
-                      Detail
-                    </Button>
+                    <Row justify="space-between" gutter={8}>
+                      <Col span={12}>
+                        <Button
+                          type="primary"
+                          onClick={() => goToDetail(render?.id)}
+                        >
+                          Detail
+                        </Button>
+                      </Col>
+                      <Col span={12}>
+                        <Button onClick={() => solveHandler(render?.id)}>
+                          Solve
+                        </Button>
+                      </Col>
+                    </Row>
                   );
                 }}
               />
@@ -86,4 +114,4 @@ const PlantLists = () => {
     </Fragment>
   );
 };
-export default PlantLists;
+export default SuggestionLists;
