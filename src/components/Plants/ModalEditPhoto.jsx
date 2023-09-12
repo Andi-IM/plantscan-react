@@ -1,4 +1,5 @@
 import { Button, Col, Form, Image, Input, Modal, Row } from "antd";
+import { useEffect } from "react";
 import { usePlantsFormContext } from "../../context/PlantsFormContext";
 
 const ModalEditPhoto = () => {
@@ -26,6 +27,13 @@ const ModalEditPhoto = () => {
     );
     setOpenModalImg(false);
   };
+
+  useEffect(() => {
+    FormEditPhotoInfo?.setFieldsValue({
+      description: objDetailImg?.description,
+      attribution: objDetailImg?.attribution,
+    });
+  }, [openModalImg]);
 
   return (
     <Modal

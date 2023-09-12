@@ -51,6 +51,10 @@ const Sidebar = ({ children }) => {
       key: "plant_lists",
       label: "Plant Lists",
     },
+    {
+      key: "suggestion_lists",
+      label: "Suggestion",
+    },
   ];
 
   return (
